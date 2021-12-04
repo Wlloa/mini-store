@@ -15,6 +15,8 @@ import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material/styles";
 import useTranslation from "next-translate/useTranslation";
 import { SwitchLanguage } from "./switchLanguage";
+import { useTheme } from "@mui/material/styles";
+import { ThemeSwitch } from "./themeSwitch";
 
 const HoverBtn = styled(Button)<ButtonProps>(({ theme }) => ({
   "&:hover": {
@@ -29,6 +31,8 @@ export const Navbar = () => {
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
+
+  const theme = useTheme();
 
   const { t, lang } = useTranslation("common");
 
@@ -51,7 +55,13 @@ export const Navbar = () => {
   };
 
   return (
-    <AppBar position="static" color="transparent">
+    <AppBar
+      position="static"
+      style={{
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+      }}
+    >
       <Container maxWidth={false}>
         <Toolbar disableGutters>
           <Typography
@@ -61,7 +71,7 @@ export const Navbar = () => {
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
             align="center"
           >
-            Mini Store
+            Store
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -106,25 +116,26 @@ export const Navbar = () => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
           >
-            Mini Store
+            Store
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
               <HoverBtn
                 key={page}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "black", display: "block" }}
+                sx={{ my: 2, display: "block", color: theme.palette.text.primary }}
               >
                 {page}
               </HoverBtn>
             ))}
           </Box>
 
-          <Box sx={{ flexGrow: 0, display:"flex", alignItems: "center" }} >
+          <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
             <SwitchLanguage />
+            <ThemeSwitch />
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Wil" src="" />
               </IconButton>
             </Tooltip>
             <Menu
@@ -154,10 +165,4 @@ export const Navbar = () => {
       </Container>
     </AppBar>
   );
-  //   return <div className={style.nav}>
-  //       <div className={style.logo}>
-  //         {/* eslint-disable-next-line @next/next/no-img-element */}
-  //           <img className={style.logo} src="/shop.ico" alt=""></img>
-  //       </div>
-  //   </div>;
 };

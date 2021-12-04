@@ -1,8 +1,10 @@
 import React from "react";
-import styles from './Footer.module.css';
+import styles from "./Footer.module.css";
 import Image from "next/image";
+import useTranslation from "next-translate/useTranslation";
 
 export const Footer = () => {
+  const { t } = useTranslation("common");
   return (
     <footer className={styles.footer}>
       <a
@@ -10,7 +12,9 @@ export const Footer = () => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <span>Created by <strong>Wlloa</strong></span>
+        <span>
+          {t("footer")} <strong>Wlloa</strong>
+        </span>
         <p>{new Date().getFullYear()}</p>
         {/* <span className={styles.logo}>
           <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />

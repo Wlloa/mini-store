@@ -16,8 +16,7 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/shop.ico" />
       </Head>
-      <Navbar />
-      <main className={styles.main}></main>
+      <main></main>
       <Footer />
     </div>
   );
