@@ -4,30 +4,38 @@ import {
   createTheme,
   PaletteMode,
   ThemeProvider,
-  Theme,
-  ThemeOptions,
   CssBaseline,
 } from "@mui/material";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getThemeOption } from "../utils/theme";
+import React, { createContext, useEffect, useMemo, useState } from "react";
+import { getThemeModeStorage, getThemeOption } from "../utils/theme";
 import { Navbar } from "../components/navbar";
 
 interface ThemeContext {
   mode: PaletteMode;
-  toggleMode: ()=> void
+  toggleMode: () => void;
 }
 
-export const ThemeGlobalContext = createContext<ThemeContext>({ toggleMode: () => {}, mode: 'light' });
+export const ThemeGlobalContext = createContext<ThemeContext>({
+  toggleMode: () => {},
+  mode: "light",
+});
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [mode, setMode] = useState<PaletteMode>("light");
+
+  useEffect(() => {
+    //Initialize client side de theme from localStorage because SSR
+    const modeStorage = getThemeModeStorage();
+    if (modeStorage) {
+      setMode(modeStorage);
+    }
+  }, []);
 
   const colorMode = useMemo(
     () => ({
       toggleMode: () => {
         setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
       },
-      mode: mode
     }),
     []
   );
@@ -35,9 +43,9 @@ function MyApp({ Component, pageProps }: AppProps) {
   const theme = useMemo(() => createTheme(getThemeOption(mode)), [mode]);
 
   return (
-    <ThemeGlobalContext.Provider value={colorMode}>
+    <ThemeGlobalContext.Provider value={{ ...colorMode, mode }}>
       <ThemeProvider theme={theme}>
-      <CssBaseline />
+        <CssBaseline />
         <Navbar />
         <Component {...pageProps} />;
       </ThemeProvider>

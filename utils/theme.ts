@@ -5,6 +5,7 @@ import {
   ThemeOptions,
 } from "@mui/material";
 import { cyan, deepOrange, grey, teal } from "@mui/material/colors";
+import { useEffect, useState } from "react";
 
 // const theme = createTheme({
 //   palette: {
@@ -108,11 +109,12 @@ const getThemeOption = (mode: PaletteMode): ThemeOptions => {
   return mode === "light" ? darkThemeOption : lightThemeOption;
 };
 
-const getThemeModeStorage = (): PaletteMode | null => {
-  return localStorage.getItem("user-theme") as PaletteMode | null;
+const getThemeModeStorage = (): PaletteMode => {
+  return localStorage.getItem("user-theme") as PaletteMode;
 };
 
 const setThemeModeStorage = (mode: PaletteMode): void => {
+  console.log(mode);
   localStorage.setItem("user-theme", mode);
 };
 

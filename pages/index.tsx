@@ -12,7 +12,7 @@ const Home: NextPage = () => {
         <title>My Store</title>
         <meta
           name="description"
-          content="personal mini store template project"
+          content="personal store"
         />
         <link rel="icon" href="/shop.ico" />
       </Head>
