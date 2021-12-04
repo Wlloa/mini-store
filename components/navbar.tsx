@@ -16,7 +16,7 @@ import { styled } from "@mui/material/styles";
 import useTranslation from "next-translate/useTranslation";
 import { SwitchLanguage } from "./switchLanguage";
 import { useTheme } from "@mui/material/styles";
-import { ThemeSwitch } from "./themeSwitch";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 const HoverBtn = styled(Button)<ButtonProps>(({ theme }) => ({
   "&:hover": {
