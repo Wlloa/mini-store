@@ -9,6 +9,7 @@ import {
 import React, { createContext, useEffect, useMemo, useState } from "react";
 import { getThemeModeStorage, getThemeOption } from "../utils/theme";
 import { Navbar } from "../components/navbar";
+import { SessionProvider } from "next-auth/react";
 
 interface ThemeContext {
   mode: PaletteMode;
@@ -20,7 +21,7 @@ export const ThemeGlobalContext = createContext<ThemeContext>({
   mode: "light",
 });
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const [mode, setMode] = useState<PaletteMode>("light");
 
   useEffect(() => {
@@ -43,13 +44,15 @@ function MyApp({ Component, pageProps }: AppProps) {
   const theme = useMemo(() => createTheme(getThemeOption(mode)), [mode]);
 
   return (
-    <ThemeGlobalContext.Provider value={{ ...colorMode, mode }}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Navbar />
-        <Component {...pageProps} />;
-      </ThemeProvider>
-    </ThemeGlobalContext.Provider>
+    <SessionProvider session={session}>
+      <ThemeGlobalContext.Provider value={{ ...colorMode, mode }}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Navbar />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </ThemeGlobalContext.Provider>
+    </SessionProvider>
   );
 }
 
