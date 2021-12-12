@@ -1,6 +1,12 @@
 {
-    "orders": "Ordenes",
-    "products": "Productos",
-    "footer": "Creado por"
-
+  "orders": "Ordenes",
+  "products": "Productos",
+  "footer": "Creado por",
+  "signin": "Entrar",
+  "register": "Registrarse",
+  "signin_with_google": "Continuar con Google",
+  "profile": "Cuenta",
+  "logout": "Salir",
+  "password": "Contraseña",
+  "or": "o"
 }
