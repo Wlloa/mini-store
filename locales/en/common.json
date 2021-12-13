@@ -8,5 +8,7 @@
   "profile": "Profile",
   "logout": "Logout",
   "password": "Password",
-  "or": "or"
+  "or": "or",
+  "custom-email": "Enter with your email account",
+  "signup-text": "Create new account?"
 }

@@ -1,6 +1,5 @@
 import { AppBar } from "@mui/material";
 import React from "react";
-import style from "./Navbar.module.css";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -10,7 +9,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Button, { ButtonProps } from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material/styles";
 import useTranslation from "next-translate/useTranslation";
@@ -19,6 +17,8 @@ import { useTheme } from "@mui/material/styles";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { palette } from "@mui/system";
+import { cyan, deepOrange, grey, teal } from "@mui/material/colors";
 
 const HoverBtn = styled(Button)<ButtonProps>(({ theme }) => ({
   "&:hover": {
@@ -37,10 +37,9 @@ export const Navbar = () => {
   const theme = useTheme();
   const { data: session } = useSession();
 
-  const { t, lang } = useTranslation("common");
+  const { t } = useTranslation("common");
 
   const pages = [t("products"), t("orders")];
-  const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -147,10 +146,16 @@ export const Navbar = () => {
             <ThemeSwitch />
             {session ? (
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar
-                  alt="User avatar"
-                  src={session?.user ? String(session.user.image) : undefined}
-                />
+                {!session.user?.image ? (
+                  <Avatar alt="User avatar" sx={{ bgcolor: cyan[500] }}>
+                    {session.user?.email?.slice(0, 1)}
+                  </Avatar>
+                ) : (
+                  <Avatar
+                    alt="User avatar"
+                    src={session?.user?.image}
+                  />
+                )}
               </IconButton>
             ) : (
               <Link href={"/auth"}>{t("signin")}</Link>

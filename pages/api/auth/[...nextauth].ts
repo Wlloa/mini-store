@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { signIn } from "next-auth/react";
 import { User } from "../../../models/user";
 import { getCollection, insertOne } from "../../../utils/mongo";
+import { hashPassword } from "../../../utils/utils";
 
 interface Credential {
   email: string;
@@ -48,10 +49,16 @@ export default NextAuth({
           }
 
           const user = result[0];
-          console.log(user);
+          // Check if the user's account was created with google provider
+          if (user.googleUser) {
+            throw new Error("The user has an account with google provider");
+          }
+
+         
           return {
             name: user.name,
-            image: user.picture
+            image: user.picture,
+            email: user.email
           };
         }
         return null;

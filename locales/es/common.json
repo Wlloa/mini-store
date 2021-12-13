@@ -8,5 +8,8 @@
   "profile": "Cuenta",
   "logout": "Salir",
   "password": "Contraseña",
-  "or": "o"
+  "or": "o",
+  "custom-email": "Continuar con email",
+  "signup-text": "Crear cuenta nueva?"
+
 }

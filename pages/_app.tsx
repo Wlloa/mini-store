@@ -10,6 +10,7 @@ import React, { createContext, useEffect, useMemo, useState } from "react";
 import { getThemeModeStorage, getThemeOption } from "../utils/theme";
 import { Navbar } from "../components/navbar";
 import { SessionProvider } from "next-auth/react";
+import Head from "next/head";
 
 interface ThemeContext {
   mode: PaletteMode;
@@ -45,6 +46,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
 
   return (
     <SessionProvider session={session}>
+      <Head>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
       <ThemeGlobalContext.Provider value={{ ...colorMode, mode }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
