@@ -2,14 +2,16 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { signIn } from "next-auth/react";
-import { User } from "../../../models/user";
-import { getCollection, insertOne } from "../../../utils/mongo";
+import { IUser, User } from "../../../models/user";
+// import { getCollection, insertOne } from "../../../utils/mongo";
 import { hashPassword } from "../../../utils/utils";
-
+import mongoose from "mongoose";
 interface Credential {
   email: string;
   password: string;
 }
+
+const url = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_DB}/store-${process.env.STORE_ENVIRONMENT}?retryWrites=true&w=majority`;
 
 export default NextAuth({
   session: {
@@ -36,29 +38,29 @@ export default NextAuth({
       async authorize(credentials: Credential | undefined, req) {
         if (credentials && credentials.email) {
           console.log(credentials);
+          mongoose
+            .connect(url)
+            .then(() => {
+              console.log("connected to MongoDb");
+            })
+            .catch((error) => console.log(error));
 
-          //Search for user in db
-          const result = await getCollection(
-            "user",
-            { email: credentials.email },
-            { _id: -1 }
-          );
+          const user = await User.findOne({ email: credentials.email });
+          mongoose.connection.close();
 
-          if (result.length === 0) {
+          if (!user) {
             throw new Error("No user found");
           }
 
-          const user = result[0];
           // Check if the user's account was created with google provider
           if (user.googleUser) {
             throw new Error("The user has an account with google provider");
           }
 
-         
           return {
             name: user.name,
             image: user.picture,
-            email: user.email
+            email: user.email,
           };
         }
         return null;
@@ -86,22 +88,26 @@ export default NextAuth({
     async signIn({ account, profile }) {
       console.log(account);
       //Create user accout over google sigin
-      if (profile) {
+      if (profile && account.provider === "google") {
         // If the user already exists do not create him
-        const users = await getCollection(
-          "user",
-          { email: profile.email },
-          { _id: -1 }
-        );
-        if (users.length === 0) {
+        mongoose
+          .connect(url)
+          .then(() => {
+            console.log("connected to MongoDb");
+          })
+          .catch((error) => console.log(error));
+        const user = await User.findOne({ email: profile.email });
+
+        if (!user) {
           // Create new user from Google login
-          const user: User = {
+          const newUser = new User({
             email: String(profile.email),
             picture: String(profile.picture),
             name: String(profile.name),
             googleUser: account.provider === "google",
-          };
-          const result = await insertOne("user", user);
+          });
+          const createdUser = await newUser.save();
+          mongoose.connection.close();
         }
       }
       return true;
