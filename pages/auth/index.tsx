@@ -2,6 +2,7 @@ import React, { FormEvent, useRef, useState } from "react";
 import Link from "next/link";
 import useTranslation from "next-translate/useTranslation";
 import {
+  Alert,
   Backdrop,
   Box,
   Button,
@@ -22,6 +23,7 @@ import { GetServerSideProps } from "next";
 import { ThemedProps } from "../../models/interfaces";
 import { useTheme } from "@mui/material";
 import { palette } from "@mui/system";
+import Notification from "../../components/notification/Notifications";
 
 const StyledForm = styled.form<ThemedProps>`
   display: flex;
@@ -30,6 +32,13 @@ const StyledForm = styled.form<ThemedProps>`
   padding: 8px;
 `;
 
+interface LoginResult {
+  error?: string | null;
+  status?: number;
+  ok?: boolean;
+  url?: string | null;
+}
+
 const SignIn = () => {
   const { data: session } = useSession();
   const theme = useTheme();
@@ -37,15 +46,22 @@ const SignIn = () => {
   const passRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [showError, setShowError] = useState<boolean>(false);
 
   const { t } = useTranslation("common");
+
+  const handleToogle = (): void => {
+    setShowError((current) => !current);
+  };
 
   const handleSignin = async (event: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
     event.preventDefault();
     const email = emailRef.current?.value;
     const pass = passRef?.current?.value;
-    const result = await signIn("credentials", {
+
+    const result: LoginResult | undefined = await signIn("credentials", {
       redirect: false,
       email: email,
       password: pass,
@@ -57,7 +73,10 @@ const SignIn = () => {
       router.replace("/");
       setLoading(false);
     }
+    // if something went wrong
     setLoading(false);
+    setError(error || "something went wrong");
+    setShowError(true);
   };
 
   const handleGoogleSignin = () => {
@@ -72,27 +91,41 @@ const SignIn = () => {
     const email = emailRef.current?.value;
     const url = `${process.env.NEXTAUTH_URL}/api/auth/signup`;
 
-    const response = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      const signedUser = await signIn("credentials", {
-        redirect: false,
-        email: email,
-        password: password,
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+      console.log(response);
+      //const data = await response.json();
 
-      //@ts-ignore
-      if (!signedUser.error) {
+      if (response.ok) {
+        const signedUser = await signIn("credentials", {
+          redirect: false,
+          email: email,
+          password: password,
+        });
+
+        //@ts-ignore
+        if (!signedUser.error) {
+          setLoading(false);
+          router.replace("/");
+        }
+      } else {
         setLoading(false);
-        router.replace("/");
+        handleToogle();
+        setError("something went wrong signin up dude");
+      }
+    } catch (error) {
+      setLoading(false);
+      handleToogle();
+      if (error instanceof Error) {
+        setError(error.message || "bateo");
+      } else {
+        setError("something went wrong signin up");
       }
     }
   };
@@ -109,6 +142,15 @@ const SignIn = () => {
         justifyContent: "center",
       }}
     >
+      {showError && (
+        <Notification
+          show={showError}
+          text={error}
+          toggle={handleToogle}
+          type="error"
+        />
+      )}
+
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}

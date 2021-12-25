@@ -6,6 +6,7 @@ import { IUser, User } from "../../../models/user";
 // import { getCollection, insertOne } from "../../../utils/mongo";
 import { hashPassword } from "../../../utils/utils";
 import mongoose from "mongoose";
+import { connectToMongo } from "../../../utils/mongo";
 interface Credential {
   email: string;
   password: string;
@@ -38,15 +39,16 @@ export default NextAuth({
       async authorize(credentials: Credential | undefined, req) {
         if (credentials && credentials.email) {
           console.log(credentials);
-          mongoose
-            .connect(url)
-            .then(() => {
-              console.log("connected to MongoDb");
-            })
-            .catch((error) => console.log(error));
+        
+          await connectToMongo();
+          let user: IUser | null = null;
 
-          const user = await User.findOne({ email: credentials.email });
-          mongoose.connection.close();
+          try {
+            user = await User.findOne({ email: credentials.email });
+            mongoose.connection.close();
+          } catch (error) {
+            throw new Error("Something went wrong with Mongo, try later");
+          }
 
           if (!user) {
             throw new Error("No user found");
@@ -82,6 +84,7 @@ export default NextAuth({
   ],
   pages: {
     signIn: "/auth",
+    error: "/auth"
   },
   secret: "rlXaq5GLwQvxRFxFk7R5PKNxP/wucHkrBk5NUne5dbI=",
   callbacks: {
@@ -90,24 +93,23 @@ export default NextAuth({
       //Create user accout over google sigin
       if (profile && account.provider === "google") {
         // If the user already exists do not create him
-        mongoose
-          .connect(url)
-          .then(() => {
-            console.log("connected to MongoDb");
-          })
-          .catch((error) => console.log(error));
-        const user = await User.findOne({ email: profile.email });
+        await connectToMongo();
+        try {
+          const user = await User.findOne({ email: profile.email });
 
-        if (!user) {
-          // Create new user from Google login
-          const newUser = new User({
-            email: String(profile.email),
-            picture: String(profile.picture),
-            name: String(profile.name),
-            googleUser: account.provider === "google",
-          });
-          const createdUser = await newUser.save();
-          mongoose.connection.close();
+          if (!user) {
+            // Create new user from Google login
+            const newUser = new User({
+              email: String(profile.email),
+              picture: String(profile.picture),
+              name: String(profile.name),
+              googleUser: account.provider === "google",
+            });
+            const createdUser = await newUser.save();
+            mongoose.connection.close();
+          }
+        } catch (error) {
+          throw new Error("Someting went wrong with sign in")
         }
       }
       return true;

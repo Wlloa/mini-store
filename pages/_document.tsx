@@ -28,6 +28,7 @@ class MyDocument extends Document {
           />
         </Head>
         <body>
+          <div id="notification" style={{position: 'absolute', top: 64, right: 8}}/>
           <Main />
           <NextScript />
         </body>

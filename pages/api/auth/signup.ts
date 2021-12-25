@@ -14,26 +14,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     //console.log("connection to: ", url);
     // await mongoose.connect(url);
     await connectToMongo();
-    const returnedUser = await User.findOne({ email: body.email });
+    try {
+      const returnedUser = await User.findOne({ email: body.email });
 
-    if (returnedUser) {
-      throw new Error(`Already exits an account with ${body.email}`);
+      if (returnedUser) {
+        throw new Error(`Already exits an account with ${body.email}`);
+      }
+
+      const hashedPass = await hashPassword(body.password);
+
+      const user = new User({
+        email: body.email,
+        googleUser: false,
+        name: "",
+        picture: undefined,
+        password: hashedPass,
+      });
+
+      const createdUser = await user.save();
+      mongoose.connection.close();
+      res.status(200).json({ message: "User created", createdUser });
+    } catch (error) {
+      throw new Error("something went wrong with mongoDb");
     }
-
-    const hashedPass = await hashPassword(body.password);
-
-    const user = new User({
-      email: body.email,
-      googleUser: false,
-      name: "",
-      picture: undefined,
-      password: hashedPass,
-    });
-    // const insertResult = await insertOne("user", user);
-    const createdUser = await user.save();
-    mongoose.connection.close();
-
-    res.status(200).json({ message: "User created", createdUser });
   }
 };
 
