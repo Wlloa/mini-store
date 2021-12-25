@@ -1,6 +1,5 @@
 import { AppBar } from "@mui/material";
 import React from "react";
-import style from "./Navbar.module.css";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -10,13 +9,16 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Button, { ButtonProps } from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { styled } from "@mui/material/styles";
 import useTranslation from "next-translate/useTranslation";
 import { SwitchLanguage } from "./switchLanguage";
 import { useTheme } from "@mui/material/styles";
 import { ThemeSwitch } from "./ThemeSwitch";
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
+import { palette } from "@mui/system";
+import { cyan, deepOrange, grey, teal } from "@mui/material/colors";
 
 const HoverBtn = styled(Button)<ButtonProps>(({ theme }) => ({
   "&:hover": {
@@ -33,11 +35,11 @@ export const Navbar = () => {
   );
 
   const theme = useTheme();
+  const { data: session } = useSession();
 
-  const { t, lang } = useTranslation("common");
+  const { t } = useTranslation("common");
 
   const pages = [t("products"), t("orders")];
-  const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -53,6 +55,11 @@ export const Navbar = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  // if not session do not display the navbar
+  if (!session) {
+    return null;
+  }
 
   return (
     <AppBar
@@ -123,7 +130,11 @@ export const Navbar = () => {
               <HoverBtn
                 key={page}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, display: "block", color: theme.palette.text.primary }}
+                sx={{
+                  my: 2,
+                  display: "block",
+                  color: theme.palette.text.primary,
+                }}
               >
                 {page}
               </HoverBtn>
@@ -133,11 +144,23 @@ export const Navbar = () => {
           <Box sx={{ flexGrow: 0, display: "flex", alignItems: "center" }}>
             <SwitchLanguage />
             <ThemeSwitch />
-            <Tooltip title="Open settings">
+            {session ? (
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Wil" src="" />
+                {!session.user?.image ? (
+                  <Avatar alt="User avatar" sx={{ bgcolor: cyan[500] }}>
+                    {session.user?.email?.slice(0, 1)}
+                  </Avatar>
+                ) : (
+                  <Avatar
+                    alt="User avatar"
+                    src={session?.user?.image}
+                  />
+                )}
               </IconButton>
-            </Tooltip>
+            ) : (
+              <Link href={"/auth"}>{t("signin")}</Link>
+            )}
+
             <Menu
               sx={{ mt: "45px" }}
               id="menu-appbar"
@@ -154,11 +177,13 @@ export const Navbar = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem onClick={handleCloseNavMenu}>
+                <Typography textAlign="center">{t("profile")}</Typography>
+              </MenuItem>
+
+              <MenuItem onClick={() => signOut()}>
+                <Typography textAlign="center">{t("logout")}</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>

@@ -1,5 +1,14 @@
 {
-    "orders": "Orders",
-    "products": "Products",
-    "footer": "Created by"
+  "orders": "Orders",
+  "products": "Products",
+  "footer": "Created by",
+  "signin": "Login",
+  "register": "Register",
+  "signin_with_google": "Continue with Google",
+  "profile": "Profile",
+  "logout": "Logout",
+  "password": "Password",
+  "or": "or",
+  "custom-email": "Enter with your email account",
+  "signup-text": "Create new account?"
 }
